@@ -36,12 +36,15 @@ function safeJsonParse(value: string | null | undefined): any {
   try { return JSON.parse(value); } catch { return undefined; }
 }
 
-/** Sanitize a query string for FTS5 MATCH - escape special syntax characters */
+/** Sanitize a query string for FTS5 MATCH - escape special syntax characters.
+ * Supports prefix matching: "GetUnit" will match "GetUnitName", "GetUnitClass" etc. */
 function sanitizeFtsQuery(query: string): string {
-  // Remove FTS5 special operators and wrap in double quotes for literal matching
+  // Remove FTS5 special operators
   const cleaned = query.replace(/['"(){}^*:]/g, ' ').trim();
   if (!cleaned) return '""';
-  return `"${cleaned}"`;
+  // Split into words, quote each for safety, append * for prefix matching
+  const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+  return words.map(w => `"${w}"*`).join(' ');
 }
 const DB_PATH = join(PROJECT_ROOT, 'data', 'eso_sets.db');
 const SCHEMA_PATH = join(PROJECT_ROOT, 'mcp-server', 'src', 'database', 'schema.sql');

@@ -202,7 +202,9 @@ CREATE TABLE IF NOT EXISTS api_functions (
   description TEXT,
   source_file TEXT,
   is_protected BOOLEAN DEFAULT 0,
-  api_version TEXT
+  api_version TEXT,
+  is_deprecated BOOLEAN DEFAULT 0,
+  source_type TEXT              -- 'official', 'uesp_lua', 'deprecated_alias'
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_api_func_name ON api_functions(name);

@@ -1,20 +1,20 @@
 # ESO Addon Development Assistant - MCP Server
 
-A comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Elder Scrolls Online addon development**. Provides AI assistants with 39 tools covering the entire ESO addon development workflow — from API reference lookup to code generation, debugging, and ESOUI upload preparation.
+A comprehensive [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Elder Scrolls Online addon development**. Provides AI assistants with 42 tools covering the entire ESO addon development workflow — from API reference lookup to code generation, debugging, and ESOUI upload preparation.
 
 Works with **Claude Desktop, ChatGPT, Cursor, Windsurf, VS Code (Copilot), Cline, Continue**, and any other MCP-compatible AI client.
 
 ## Features
 
-### 39 Tools in 10 Modules
+### 42 Tools in 10 Modules
 
 | Module | Tools | Description |
 |--------|-------|-------------|
-| **API Reference** | 6 | Search 8,659 API functions, 1,025 events, 497K constants, UI controls |
-| **Set Database** | 7 | Search 705 equipment sets with bonuses, locations, drop mechanics |
+| **API Reference** | 6 | Search 9,303 API functions, 1,051 events, 497K constants, UI controls |
+| **Set Database** | 7 | Search 704 equipment sets with bonuses, locations, drop mechanics |
 | **Character Import** | 4 | Import characters from ESO SavedVariables |
-| **Code Generation** | 5 | Generate event handlers, settings panels, slash commands, UI XML, SavedVariables |
-| **Addon Scaffolding** | 4 | Create manifests, boilerplate, single files, upload preparation |
+| **Code Generation** | 7 | Generate event handlers, settings panels, slash commands, UI XML, SavedVariables |
+| **Addon Scaffolding** | 5 | Create manifests, boilerplate, single files, upload preparation |
 | **Analysis & Debug** | 4 | Analyze SavedVariables, parse error logs, review addon code, validate manifests |
 | **ESO Data** | 5 | Search zones, skills reference, patch notes, combined API docs, source code browser |
 | **ESOUI Rules** | 3 | Official addon rules/restrictions, localization code, hook patterns |
@@ -24,10 +24,10 @@ Works with **Claude Desktop, ChatGPT, Cursor, Windsurf, VS Code (Copilot), Cline
 
 | Data | Count | Source |
 |------|-------|--------|
-| API Functions | 8,659 | Official ESOUIDocumentation.txt (GitHub) + UESP |
-| Events | 1,025 (586 with typed parameters) | Official docs + UESP |
+| API Functions | 9,303 | Official ESOUIDocumentation.txt (GitHub) + UESP |
+| Events | 1,051 (586 with typed parameters) | Official docs + UESP |
 | Constants & Enums | 497,405 | UESP |
-| Equipment Sets | 705 | LibSets (API 101048) |
+| Equipment Sets | 704 | LibSets (API 101049) |
 | Set Bonus Descriptions | 2,361 (704 sets) | eso-hub.com |
 | Zones | 175 | LibSets |
 | Wayshrines | 567 | LibSets |
@@ -91,9 +91,9 @@ Configure the MCP server command: `node /path/to/ESOUI_MCP/mcp-server/dist/index
 ## Tool Overview
 
 ### API Reference
-- `search_api_functions` — Search 8,659 ESO API functions with typed signatures
+- `search_api_functions` — Search 9,303 ESO API functions with typed signatures
 - `get_function_details` — Full details: params, returns, related functions
-- `search_events` — Search 1,025 events with parameter definitions
+- `search_events` — Search 1,051 events with parameter definitions
 - `search_constants` — Search 497K constants/enums by name or group
 - `get_ui_control_info` — UI control types with methods, properties, events
 - `search_source_code` — ESO UI source code search guidance
@@ -104,13 +104,16 @@ Configure the MCP server command: `node /path/to/ESOUI_MCP/mcp-server/dist/index
 - `generate_slash_command` — Slash commands with subcommand routing
 - `generate_ui_xml` — ESO XML for 8 element types (TopLevelControl, Button, Label, etc.)
 - `generate_savedvariables_code` — ZO_SavedVars with defaults and helpers
+- `generate_class_code` — OOP-style Lua class with constructor, methods, and inheritance
+- `generate_utility_snippet` — Common utility snippets (timers, iterators, color helpers, etc.)
 
 ### Addon Development
 - `create_addon_boilerplate` — Complete addon file set (manifest + Lua + settings + XML + keybindings)
-- `prepare_addon_upload` — Validate against 12 ESOUI upload rules (manifest, ZIP, hidden files, etc.)
-- `get_addon_rules` — Official ESOUI rules: restrictions, best practices, performance, localization, hooking
+- `prepare_addon_upload` — Validate against 14 ESOUI upload rules (manifest, ZIP, hidden files, etc.)
+- `get_addon_rules` — Official ESOUI rules: restrictions, best practices, performance, localization, hooking, UI guidelines, versioning, dependencies, credits, compatibility, file structure, naming conventions, SavedVariables, and event handling
 - `generate_localization` — SafeAddString or separate language files (EN/DE/FR)
 - `generate_hook_code` — ZO_PreHook, SecurePostHook, function overrides
+- `manage_changelog` — Create or update addon changelog without overwriting ESOUI-managed entries
 
 ### Analysis & Debugging
 - `analyze_addon_code` — Detect global pollution, missing unregister, performance issues
@@ -139,6 +142,7 @@ AI: "There's a new ESO update. Can you update the database?"
 - **Input validation** — All tool inputs validated with Zod schemas
 - **No command injection** — Script paths are hardcoded, never from user input
 - **Identifier validation** — Generated code uses regex-validated identifiers to prevent Lua injection
+- **Script allowlist** — Only pre-approved internal scripts can be invoked; no arbitrary execution
 - **Graceful shutdown** — SIGINT/SIGTERM handlers ensure database integrity
 
 ## Data Sources
@@ -157,7 +161,7 @@ AI: "There's a new ESO update. Can you update the database?"
 ESOUI_MCP/
 ├── mcp-server/
 │   ├── src/
-│   │   ├── index.ts                 # MCP server router (39 tools, 10 modules)
+│   │   ├── index.ts                 # MCP server router (42 tools, 10 modules)
 │   │   ├── database/db.ts           # SQLite database layer
 │   │   ├── database/schema.sql      # Database schema
 │   │   ├── services/                # API importer, Lua parser, path validator
@@ -166,8 +170,7 @@ ESOUI_MCP/
 │   ├── package.json
 │   └── tsconfig.json
 ├── data/
-│   ├── eso_sets.db                  # SQLite database (generated)
-│   └── api/ESOUIDocumentation.txt   # Official ESO API docs
+│   └── eso_sets.db                  # SQLite database (generated)
 ├── scripts/
 │   ├── import-all-sets.ts           # Import sets from LibSets
 │   ├── import-api-docs.ts           # Import API docs from GitHub

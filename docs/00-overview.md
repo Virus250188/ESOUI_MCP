@@ -1,6 +1,6 @@
 # ESO MCP Server - Documentation Overview
 
-The ESO MCP (Model Context Protocol) Server provides **39 tools** across **10 modules** for Elder Scrolls Online addon development. It powers AI assistants with deep knowledge of the ESO API, equipment sets, code generation, and addon best practices.
+The ESO MCP (Model Context Protocol) Server provides **42 tools** across **10 modules** for Elder Scrolls Online addon development. It powers AI assistants with deep knowledge of the ESO API, equipment sets, code generation, and addon best practices.
 
 ---
 
@@ -28,8 +28,8 @@ The ESO MCP (Model Context Protocol) Server provides **39 tools** across **10 mo
 | 01 | [API Reference](01-api-reference.md) | api-reference | 6 | Search ESO API functions, events, constants, UI controls, and source code |
 | 02 | [Set Database](02-set-database.md) | sets | 7 | Search sets, get details, compare, farm guides, build recommendations |
 | 03 | [Character Import](03-character-import.md) | characters | 4 | Import characters from game, list, sync, and view details |
-| 04 | [Code Generation](04-code-generation.md) | code-generation | 5 | Generate event handlers, settings panels, slash commands, UI XML, SavedVars |
-| 05 | [Addon Scaffold](05-addon-scaffold.md) | addon-scaffold | 4 | Create manifests, boilerplate projects, files, and validate for upload |
+| 04 | [Code Generation](04-code-generation.md) | code-generation | 7 | Generate event handlers, settings panels, slash commands, UI XML, SavedVars |
+| 05 | [Addon Scaffold](05-addon-scaffold.md) | addon-scaffold | 5 | Create manifests, boilerplate projects, files, and validate for upload |
 | 06 | [Analysis & Debugging](06-analysis-debugging.md) | addon-analysis + savedvars-tools | 4 | Analyze code quality, validate manifests, inspect SavedVars, parse errors |
 | 07 | [ESO Game Data](07-eso-data.md) | eso-data | 5 | Search zones, skills, patch notes, combined API search, source browsing |
 | 08 | [Addon Rules](08-addon-rules.md) | addon-rules | 3 | ESOUI rules & guidelines, localization, and hook code generation |
@@ -37,7 +37,7 @@ The ESO MCP (Model Context Protocol) Server provides **39 tools** across **10 mo
 
 ---
 
-## Complete Tool Reference (39 Tools)
+## Complete Tool Reference (42 Tools)
 
 ### API Reference Tools (6) -- [Full Docs](01-api-reference.md)
 
@@ -71,7 +71,7 @@ The ESO MCP (Model Context Protocol) Server provides **39 tools** across **10 mo
 | `sync_character` | Re-sync a specific character to update gear data |
 | `get_character_details` | Get detailed character info including equipped sets |
 
-### Code Generation Tools (5) -- [Full Docs](04-code-generation.md)
+### Code Generation Tools (7) -- [Full Docs](04-code-generation.md)
 
 | Tool | Description |
 |------|-------------|
@@ -80,15 +80,18 @@ The ESO MCP (Model Context Protocol) Server provides **39 tools** across **10 mo
 | `generate_slash_command` | Generate slash command code with subcommand routing |
 | `generate_ui_xml` | Generate ESO UI XML for 8 control types |
 | `generate_savedvariables_code` | Generate SavedVariables initialization with helpers |
+| `generate_class_code` | Generate OOP-style Lua class with constructor, methods, and inheritance |
+| `generate_utility_snippet` | Generate common utility snippets (timers, iterators, color helpers, etc.) |
 
-### Addon Scaffolding & Upload Tools (4) -- [Full Docs](05-addon-scaffold.md)
+### Addon Scaffolding & Upload Tools (5) -- [Full Docs](05-addon-scaffold.md)
 
 | Tool | Description |
 |------|-------------|
 | `create_addon_manifest` | Generate a valid `.txt` manifest file |
 | `create_addon_boilerplate` | Generate a complete addon project with selected features |
 | `create_addon_file` | Generate a single file using templates |
-| `prepare_addon_upload` | Validate addon directory for ESOUI upload readiness (12 rules) |
+| `prepare_addon_upload` | Validate addon directory for ESOUI upload readiness (14 rules) |
+| `manage_changelog` | Create or update addon changelog without overwriting ESOUI-managed entries |
 
 ### Analysis & Debugging Tools (4) -- [Full Docs](06-analysis-debugging.md)
 
@@ -113,7 +116,7 @@ The ESO MCP (Model Context Protocol) Server provides **39 tools** across **10 mo
 
 | Tool | Description |
 |------|-------------|
-| `get_addon_rules` | Get official addon rules, restrictions, and best practices (9 topics) |
+| `get_addon_rules` | Get official addon rules, restrictions, and best practices (14 topics) |
 | `generate_localization` | Generate localization code (SafeAddString or separate files) |
 | `generate_hook_code` | Generate hook code (ZO_PreHook, SecurePostHook, override) |
 
@@ -193,8 +196,8 @@ Tool modules are located at: `mcp-server/src/tools/`
 | `api-reference.ts` | API Reference (6 tools) |
 | `sets.ts` | Set Database (7 tools) |
 | `characters.ts` | Character Import (4 tools) |
-| `code-generation.ts` | Code Generation (5 tools) |
-| `addon-scaffold.ts` | Addon Scaffolding (4 tools) |
+| `code-generation.ts` | Code Generation (7 tools) |
+| `addon-scaffold.ts` | Addon Scaffolding (5 tools) |
 | `addon-analysis.ts` | Code Analysis (2 tools) |
 | `savedvars-tools.ts` | SavedVars Analysis + Error Parsing (2 tools) |
 | `eso-data.ts` | ESO Game Data (5 tools) |

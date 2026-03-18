@@ -513,18 +513,18 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
 
       if (!parsedFields['APIVersion']) {
         errors.push(
-          'Missing required field: ## APIVersion. This must be set to the current ESO API version (e.g., 101048).'
+          'Missing required field: ## APIVersion. This must be set to the current ESO API version (e.g., 101049).'
         );
       } else {
         const apiVersion = parsedFields['APIVersion'].trim();
         const apiVersionNum = parseInt(apiVersion, 10);
         if (isNaN(apiVersionNum)) {
           errors.push(
-            `Invalid APIVersion format: "${apiVersion}". Must be a numeric value like 101048.`
+            `Invalid APIVersion format: "${apiVersion}". Must be a numeric value like 101049.`
           );
         } else if (apiVersionNum < 100000 || apiVersionNum > 999999) {
           warnings.push(
-            `APIVersion ${apiVersion} looks unusual. Expected a 6-digit number like 101048. Verify this matches the current live API version.`
+            `APIVersion ${apiVersion} looks unusual. Expected a 6-digit number like 101049. Verify this matches the current live API version.`
           );
         }
       }

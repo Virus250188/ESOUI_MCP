@@ -16,7 +16,7 @@ const CreateAddonManifestSchema = z.object({
   dependencies: z.array(z.string()).optional().describe('List of required addon dependencies'),
   saved_variables: z.array(z.string()).optional().describe('List of SavedVariables names'),
   is_library: z.boolean().optional().describe('Whether this addon is a library'),
-  api_version: z.string().default('101048').describe('ESO API version number'),
+  api_version: z.string().default('101049').describe('ESO API version number'),
 });
 
 const CreateAddonBoilerplateSchema = z.object({
@@ -382,7 +382,7 @@ EVENT_MANAGER:RegisterForEvent(ADDON_NAME, ${eventName}, ${handlerName})`;
           dependencies: options?.dependencies,
           saved_variables: options?.saved_variables,
           is_library: options?.is_library,
-          api_version: options?.api_version || '101048',
+          api_version: options?.api_version || '101049',
         }),
       };
     }
@@ -428,7 +428,7 @@ const definitions = [
           description: 'List of SavedVariables names',
         },
         is_library: { type: 'boolean', description: 'Whether this addon is a library' },
-        api_version: { type: 'string', default: '101048', description: 'ESO API version number' },
+        api_version: { type: 'string', default: '101049', description: 'ESO API version number' },
       },
       required: ['addon_name', 'title', 'author'],
     },
@@ -592,7 +592,7 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         description: params.description,
         dependencies: dependencies.length > 0 ? dependencies : undefined,
         saved_variables: savedVariables.length > 0 ? savedVariables : undefined,
-        api_version: '101048',
+        api_version: '101049',
         extra_files: extraFiles,
       });
       files.push({ path: `${params.addon_name}/${params.addon_name}.txt`, content: manifestContent });
@@ -686,7 +686,7 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
           for (const v of versions) {
             const num = parseInt(v, 10);
             if (isNaN(num) || num < 100000) {
-              errors.push(`Invalid APIVersion: "${v}". Must be a 6-digit number like 101048.`);
+              errors.push(`Invalid APIVersion: "${v}". Must be a 6-digit number like 101049.`);
             }
           }
         }

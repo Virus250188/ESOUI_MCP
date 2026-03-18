@@ -254,9 +254,29 @@ const RULES: Record<string, { title: string; rules: string[] }> = {
       'For console addons, clearly mark them (e.g., "- CONSOLE" in the name)',
       'All PC addons on ESOUI automatically appear in Minion addon manager',
       'Use the Changelog tab for version notes, not the main description',
+      'ESOUI changelog field OVERWRITES the entire history - always send the FULL changelog, not just current version changes',
       'ESOUI Update API: esoui.com/forums/showthread.php?t=6556 (for automated updates)',
+      'When uploading via API, the "compatible" field must match ESOUI Game Version IDs (e.g., "101049" for 11.3.0 Season Zero)',
     ],
   },
+};
+
+// ESO API Version to ESOUI Game Version mapping
+// This maps the ## APIVersion number to the ESOUI upload compatibility versions
+export const ESO_VERSION_MAP: Record<string, { gameVersion: string; name: string; current: boolean }> = {
+  '101049': { gameVersion: '11.3.0', name: 'Season Zero', current: true },
+  '101048': { gameVersion: '11.2.0', name: 'Seasons of the Worm Cult Pt2', current: false },
+  '101047': { gameVersion: '11.1.0', name: 'Feast of Shadows', current: false },
+  '101046': { gameVersion: '11.0.0', name: 'Seasons of the Worm Cult Pt1', current: false },
+  '101045': { gameVersion: '10.3.5', name: 'Fallen Banners', current: false },
+  '101044': { gameVersion: '10.2.0', name: 'Update 44', current: false },
+  '101043': { gameVersion: '10.1.0', name: 'Update 43', current: false },
+  '101042': { gameVersion: '10.0.0', name: 'Gold Road', current: false },
+  '101041': { gameVersion: '9.3.0', name: 'Scions of Ithelia', current: false },
+  '101040': { gameVersion: '9.2.5', name: 'Endless Archive', current: false },
+  '101039': { gameVersion: '9.1.5', name: 'base-game patch', current: false },
+  '101038': { gameVersion: '9.0.0', name: 'Necrom', current: false },
+  '101037': { gameVersion: '8.3.5', name: 'Scribes of Fate', current: false },
 };
 
 // ===== HANDLER =====

@@ -544,6 +544,13 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         }
       }
 
+      // Check for common typo: "OptionalDependency" instead of "OptionalDependsOn"
+      if (content.includes('## OptionalDependency:')) {
+        warnings.push(
+          'Found "## OptionalDependency:" - this should be "## OptionalDependsOn:" (note the "On" suffix).'
+        );
+      }
+
       // Validate OptionalDependsOn format
       if (parsedFields['OptionalDependsOn']) {
         const deps = parsedFields['OptionalDependsOn']

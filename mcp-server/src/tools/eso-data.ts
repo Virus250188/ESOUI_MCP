@@ -125,7 +125,7 @@ const definitions = [
   {
     name: 'fetch_esoui_source',
     description:
-      'Get direct URLs to specific ESO UI source files on UESP or GitHub. Use this when you know WHICH file you need (e.g., "ingame/inventory/inventory.lua"). For searching by topic/keyword, use search_source_code instead. Also provides a directory structure guide of the ESO UI codebase.',
+      'Get direct URLs to specific ESO UI source files on UESP or GitHub. Returns URLs and directory guides - does NOT fetch actual file content. Use this when you know WHICH file you need (e.g., "ingame/inventory/inventory.lua"). For searching by topic/keyword, use search_source_code instead. Also provides a directory structure guide of the ESO UI codebase.',
     inputSchema: {
       type: 'object' as const,
       properties: {

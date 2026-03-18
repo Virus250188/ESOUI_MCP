@@ -716,6 +716,11 @@ function generateSavedVariablesCodeImpl(params: {
   // Remind user to call from EVENT_ADD_ON_LOADED
   lines.push('-- Call addon:InitializeSavedVariables() from your EVENT_ADD_ON_LOADED handler');
   lines.push(`-- Make sure "${svName}" is listed in your addon manifest's ## SavedVariables`);
+  if (params.account_wide) {
+    lines.push('-- TIP: For account-wide SavedVars, pass GetWorldName() as the 3rd argument to');
+    lines.push('--      ZO_SavedVars:NewAccountWide() if you want per-server separation');
+    lines.push('--      e.g., ZO_SavedVars:NewAccountWide("' + svName + '", ADDON_VERSION, GetWorldName(), defaults)');
+  }
 
   return lines.join('\n');
 }
@@ -917,22 +922,16 @@ function generateUtilitySnippet(params: { pattern: string; addon_name: string })
     case 'tooltip_extension':
       return [
         `-- Tooltip extension for ${params.addon_name}`,
-        `local function Add${params.addon_name}TooltipInfo(tooltip, data)`,
-        '    if not data then return end',
-        '    tooltip:AddLine("", "ZoFontGameSmall", 1, 1, 1, TEXT_ALIGN_CENTER)',
-        `    tooltip:AddLine("[${params.addon_name}]", "ZoFontGameBold", 1, 0.84, 0, TEXT_ALIGN_LEFT)`,
-        '    if data.description then',
-        '        tooltip:AddLine(data.description, "ZoFontGame", 0.8, 0.8, 0.8, TEXT_ALIGN_LEFT)',
-        '    end',
+        `-- Uses SecurePostHook to safely extend tooltips without breaking other addons`,
+        `local function Add${params.addon_name}TooltipInfo(control, bagId, slotIndex)`,
+        '    -- Add your custom text after the default tooltip',
+        `    control:AddLine("[${params.addon_name}] Custom text here", "ZoFontGame", 1, 0.84, 0, TEXT_ALIGN_LEFT)`,
         'end',
         '',
-        '-- Hook item tooltip',
-        'local originalLayoutItemTooltip = ZO_ItemTooltip.LayoutItem',
-        'ZO_ItemTooltip.LayoutItem = function(self, bag, slot)',
-        '    originalLayoutItemTooltip(self, bag, slot)',
-        '    local data = { description = "Custom info here" }',
-        `    Add${params.addon_name}TooltipInfo(self, data)`,
-        'end',
+        '-- Hook item tooltip using SecurePostHook (safe, non-destructive)',
+        'SecurePostHook(ItemTooltip, "SetBagItem", function(control, bagId, slotIndex)',
+        `    Add${params.addon_name}TooltipInfo(control, bagId, slotIndex)`,
+        'end)',
       ].join('\n');
 
     default:

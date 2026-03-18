@@ -634,7 +634,7 @@ export class ESO_Database {
 
   insertApiConstant(constant: Omit<APIConstant, 'id'>): void {
     const stmt = this.db.prepare(`
-      INSERT INTO api_constants (name, group_name, value, value_type, description)
+      INSERT OR IGNORE INTO api_constants (name, group_name, value, value_type, description)
       VALUES (?, ?, ?, ?, ?)
     `);
     stmt.run(

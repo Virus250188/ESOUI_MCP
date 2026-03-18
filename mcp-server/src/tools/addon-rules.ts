@@ -257,7 +257,7 @@ const RULES: Record<string, { title: string; rules: string[] }> = {
       'LibScrollableMenu: Advanced nested menus with search and multiselection',
       'LibTutorial: Step-by-step tutorial system with UI pointer boxes',
       'LibHistoire: Cached guild history access',
-      'LibGroupSocket/LibMapPing: Share data between group members',
+      'LibMapPing: Map ping utilities (NOTE: LibGroupSocket is BANNED since 2024 - do NOT use it)',
       'Always specify minimum version in dependencies: LibName>=version',
       'Use ## OptionalDependsOn for libraries that enhance but are not required',
       'Do NOT bundle library source code in your addon - list them as dependencies so users install them separately',

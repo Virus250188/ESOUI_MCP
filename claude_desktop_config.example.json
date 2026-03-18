@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "eso-build-assistant": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Miguel\\Desktop\\ESO_MCP\\mcp-server\\dist\\index.js"
+      ],
+      "env": {}
+    }
+  }
+}

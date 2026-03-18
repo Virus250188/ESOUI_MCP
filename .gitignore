@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+mcp-server/node_modules/
+
+# Build artifacts
+mcp-server/dist/
+
+# Database (generated - rebuild with import scripts)
+data/eso_sets.db
+data/eso_sets.db-wal
+data/eso_sets.db-shm
+
+# Excel temp files
+~$*
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+*.swp
+*.swo

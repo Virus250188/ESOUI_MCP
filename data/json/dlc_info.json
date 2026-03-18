@@ -1,0 +1,207 @@
+[
+  {
+    "dlc_id": 0,
+    "dlc_name": "Base Game",
+    "dlc_type": "Base Game"
+  },
+  {
+    "dlc_id": 1,
+    "dlc_name": "Imperial City",
+    "dlc_type": "DLC"
+  },
+  {
+    "dlc_id": 2,
+    "dlc_name": "Orsinium",
+    "dlc_type": "DLC"
+  },
+  {
+    "dlc_id": 3,
+    "dlc_name": "Thieves Guild",
+    "dlc_type": "DLC"
+  },
+  {
+    "dlc_id": 4,
+    "dlc_name": "Dark Brotherhood",
+    "dlc_type": "DLC"
+  },
+  {
+    "dlc_id": 5,
+    "dlc_name": "Shadows of the Hist",
+    "dlc_type": "DLC"
+  },
+  {
+    "dlc_id": 6,
+    "dlc_name": "Morrowind",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 7,
+    "dlc_name": "Horns of the Reach",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 8,
+    "dlc_name": "Clockwork City",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 9,
+    "dlc_name": "Dragon Bones",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 10,
+    "dlc_name": "Summerset",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 11,
+    "dlc_name": "Wolfhunter",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 12,
+    "dlc_name": "Murkmire",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 13,
+    "dlc_name": "Wrathstone",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 14,
+    "dlc_name": "Elsweyr",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 15,
+    "dlc_name": "Scalebreaker",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 16,
+    "dlc_name": "Dragonhold",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 17,
+    "dlc_name": "Harrowstorm",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 18,
+    "dlc_name": "Greymoor",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 19,
+    "dlc_name": "Stonethorn",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 20,
+    "dlc_name": "Markarth",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 21,
+    "dlc_name": "Flames of Ambition",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 22,
+    "dlc_name": "Blackwood",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 23,
+    "dlc_name": "Waking Flame",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 24,
+    "dlc_name": "Deadlands",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 25,
+    "dlc_name": "Ascending Tide",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 26,
+    "dlc_name": "High Isle",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 27,
+    "dlc_name": "Lost Depths",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 28,
+    "dlc_name": "Firesong",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 29,
+    "dlc_name": "Scribes of Fate",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 30,
+    "dlc_name": "Necrom",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 31,
+    "dlc_name": "Update 39",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 32,
+    "dlc_name": "Secrets of the Telvanni",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 33,
+    "dlc_name": "Scions of Ithelia",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 34,
+    "dlc_name": "Gold Road",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 35,
+    "dlc_name": "Update 43",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 36,
+    "dlc_name": "Update 44",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 37,
+    "dlc_name": "Fallen Banners",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 38,
+    "dlc_name": "Seasons of the Wormcult 1",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 39,
+    "dlc_name": "Feast of Shadows",
+    "dlc_type": "Chapter"
+  },
+  {
+    "dlc_id": 40,
+    "dlc_name": "Seasons of the Wormcult 2",
+    "dlc_type": "Chapter"
+  }
+]

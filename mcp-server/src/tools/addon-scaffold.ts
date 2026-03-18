@@ -699,12 +699,16 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         // === RULE 4: DependsOn version checks ===
         const dependsMatch = manifestContent.match(/^##\s*DependsOn:\s*(.+)/m);
         if (dependsMatch) {
-          const deps = dependsMatch[1].trim().split(/\s+/);
+          const depsString = dependsMatch[1].trim();
+          const deps = depsString.split(/\s+/);
           for (const dep of deps) {
             if (dep && !dep.includes('>=')) {
               warnings.push(`Dependency "${dep}" has no version check. Best practice: "${dep}>=<minVersion>" (e.g., "LibAddonMenu-2.0>=41").`);
               fixes.push(`Change "${dep}" to "${dep}>=1" (or the actual minimum version) in ## DependsOn.`);
             }
+          }
+          if (depsString && depsString.length > 301) {
+            warnings.push('DependsOn line exceeds 301 bytes (' + depsString.length + ' chars). ESO truncates at 301 bytes. Split across multiple ## DependsOn: lines.');
           }
         }
 
@@ -801,7 +805,24 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         fixes.push('Prefix variables with "local" or store them in a single global addon table (e.g., MyAddon.myVar instead of myVar).');
       }
 
-      // === RULE 12: ZIP structure guidance ===
+      // === RULE 12: Non-ESO file types check ===
+      const allowedExtensions = ['.lua', '.xml', '.dds', '.txt', '.addon'];
+      const nonEsoFiles: string[] = [];
+      for (const f of allFiles) {
+        const rel = f.substring(params.addon_path.length + 1);
+        // Skip files already flagged as unwanted
+        const isUnwanted = unwantedPatterns.some(p => rel.includes(p));
+        if (isUnwanted) continue;
+        const hasAllowedExt = allowedExtensions.some(ext => f.toLowerCase().endsWith(ext));
+        if (!hasAllowedExt) {
+          nonEsoFiles.push(rel);
+        }
+      }
+      if (nonEsoFiles.length > 0) {
+        warnings.push(`Non-ESO files found (only .lua, .xml, .dds, .txt, .addon are used by ESO): ${nonEsoFiles.join(', ')}. These will be ignored by the game but increase ZIP size.`);
+      }
+
+      // === ZIP structure guidance ===
       const zipInstructions = [
         `The ZIP must contain a folder "${addonFolder}/" at the root level.`,
         `Inside: ${manifestName || addonFolder + '.txt'} + all .lua/.xml files.`,

@@ -88,6 +88,30 @@ const GenerateSavedVariablesCodeSchema = z.object({
   namespace: z.string().optional().describe('Namespace table for the addon'),
 });
 
+const GenerateClassCodeSchema = z.object({
+  class_name: z.string().regex(/^[A-Z][A-Za-z0-9_]*$/, 'Must start with an uppercase letter').describe('The class name (PascalCase)'),
+  parent_class: z.string().optional().default('ZO_Object').describe('Parent class to subclass from (default: ZO_Object)'),
+  methods: z.array(z.string()).optional().describe('List of method names to generate stubs for'),
+  addon_name: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/, 'Must be a valid Lua identifier').describe('The addon name'),
+});
+
+const GenerateUtilitySnippetSchema = z.object({
+  pattern: z
+    .enum([
+      'throttled_update',
+      'string_format',
+      'deep_copy',
+      'color_def',
+      'callback_object',
+      'sort_filter_list',
+      'icon_format',
+      'animation',
+      'tooltip_extension',
+    ])
+    .describe('The utility pattern to generate'),
+  addon_name: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/, 'Must be a valid Lua identifier').describe('The addon name'),
+});
+
 // ===== HELPERS =====
 
 function eventNameToHandlerName(eventName: string): string {
@@ -696,6 +720,226 @@ function generateSavedVariablesCodeImpl(params: {
   return lines.join('\n');
 }
 
+function generateClassCode(params: {
+  class_name: string;
+  parent_class: string;
+  methods?: string[];
+  addon_name: string;
+}): string {
+  const lines: string[] = [];
+  const cls = params.class_name;
+  const parent = params.parent_class;
+
+  lines.push(`-- ${cls} class for ${params.addon_name}`);
+  lines.push(`local ${cls} = ${parent}:Subclass()`);
+  lines.push('');
+  lines.push(`function ${cls}:New(...)`);
+  lines.push(`    local obj = ${parent}.New(self)`);
+  lines.push('    obj:Initialize(...)');
+  lines.push('    return obj');
+  lines.push('end');
+  lines.push('');
+  lines.push(`function ${cls}:Initialize(control)`);
+  lines.push('    self.control = control');
+  lines.push('end');
+
+  if (params.methods && params.methods.length > 0) {
+    for (const method of params.methods) {
+      lines.push('');
+      lines.push(`function ${cls}:${method}()`);
+      lines.push(`    -- TODO: implement ${method}`);
+      lines.push('end');
+    }
+  }
+
+  lines.push('');
+  lines.push(`${params.addon_name}.${cls} = ${cls}`);
+
+  return lines.join('\n');
+}
+
+function generateUtilitySnippet(params: { pattern: string; addon_name: string }): string {
+  switch (params.pattern) {
+    case 'throttled_update':
+      return [
+        `-- Throttled update handler for ${params.addon_name}`,
+        'local THROTTLE_MS = 200',
+        'local lastUpdate = 0',
+        'control:SetHandler("OnUpdate", function()',
+        '    local now = GetGameTimeMilliseconds()',
+        '    if now - lastUpdate < THROTTLE_MS then return end',
+        '    lastUpdate = now',
+        '    -- Your update logic here',
+        'end)',
+      ].join('\n');
+
+    case 'string_format':
+      return [
+        `-- String formatting helpers for ${params.addon_name}`,
+        'local function FormatNumber(n)',
+        '    if n >= 1000000 then',
+        '        return string.format("%.1fM", n / 1000000)',
+        '    elseif n >= 1000 then',
+        '        return string.format("%.1fK", n / 1000)',
+        '    end',
+        '    return tostring(n)',
+        'end',
+        '',
+        'local function ColorText(text, r, g, b)',
+        '    return string.format("|c%02x%02x%02x%s|r", r * 255, g * 255, b * 255, text)',
+        'end',
+        '',
+        'local function PadLeft(str, len, char)',
+        '    char = char or " "',
+        '    return string.rep(char, len - #str) .. str',
+        'end',
+      ].join('\n');
+
+    case 'deep_copy':
+      return [
+        `-- Deep copy utility for ${params.addon_name}`,
+        'local function DeepCopy(orig)',
+        '    local orig_type = type(orig)',
+        '    local copy',
+        '    if orig_type == "table" then',
+        '        copy = {}',
+        '        for k, v in pairs(orig) do',
+        '            copy[DeepCopy(k)] = DeepCopy(v)',
+        '        end',
+        '        setmetatable(copy, DeepCopy(getmetatable(orig)))',
+        '    else',
+        '        copy = orig',
+        '    end',
+        '    return copy',
+        'end',
+      ].join('\n');
+
+    case 'color_def':
+      return [
+        `-- Color definitions for ${params.addon_name}`,
+        'local COLORS = {',
+        '    WHITE   = ZO_ColorDef:New(1.00, 1.00, 1.00, 1.0),',
+        '    YELLOW  = ZO_ColorDef:New(1.00, 0.84, 0.00, 1.0),',
+        '    GREEN   = ZO_ColorDef:New(0.00, 1.00, 0.00, 1.0),',
+        '    RED     = ZO_ColorDef:New(1.00, 0.20, 0.20, 1.0),',
+        '    BLUE    = ZO_ColorDef:New(0.40, 0.60, 1.00, 1.0),',
+        '    ORANGE  = ZO_ColorDef:New(1.00, 0.55, 0.00, 1.0),',
+        '    GRAY    = ZO_ColorDef:New(0.60, 0.60, 0.60, 1.0),',
+        '}',
+        '',
+        '-- Usage: COLORS.YELLOW:Colorize("some text")',
+        '-- Usage: label:SetColor(COLORS.GREEN:UnpackRGBA())',
+      ].join('\n');
+
+    case 'callback_object':
+      return [
+        `-- Callback object mixin for ${params.addon_name}`,
+        `local ${params.addon_name}Callbacks = ZO_CallbackObject:New()`,
+        '',
+        '-- Fire a callback',
+        `-- ${params.addon_name}Callbacks:FireCallbacks("OnDataReady", data)`,
+        '',
+        '-- Register a listener',
+        `-- ${params.addon_name}Callbacks:RegisterCallback("OnDataReady", function(data)`,
+        '--     -- handle data',
+        '-- end)',
+        '',
+        '-- Unregister a listener',
+        `-- ${params.addon_name}Callbacks:UnregisterCallback("OnDataReady", myFunc)`,
+      ].join('\n');
+
+    case 'sort_filter_list':
+      return [
+        `-- Sort and filter list helper for ${params.addon_name}`,
+        'local function SortAndFilter(list, filterFn, compareFn)',
+        '    local filtered = {}',
+        '    for _, entry in ipairs(list) do',
+        '        if not filterFn or filterFn(entry) then',
+        '            filtered[#filtered + 1] = entry',
+        '        end',
+        '    end',
+        '    if compareFn then',
+        '        table.sort(filtered, compareFn)',
+        '    end',
+        '    return filtered',
+        'end',
+        '',
+        '-- Example usage:',
+        '-- local visible = SortAndFilter(',
+        '--     myData,',
+        '--     function(e) return e.level >= 10 end,',
+        '--     function(a, b) return a.name < b.name end',
+        '-- )',
+      ].join('\n');
+
+    case 'icon_format':
+      return [
+        `-- Icon formatting helpers for ${params.addon_name}`,
+        'local function FormatIcon(iconPath, size)',
+        '    size = size or 32',
+        '    return string.format("|t%d:%d:%s|t", size, size, iconPath)',
+        'end',
+        '',
+        'local function FormatIconWithText(iconPath, text, size)',
+        '    size = size or 32',
+        '    return FormatIcon(iconPath, size) .. " " .. text',
+        'end',
+        '',
+        '-- Usage: label:SetText(FormatIcon("esoui/art/icons/quest_icon_collect.dds", 24))',
+      ].join('\n');
+
+    case 'animation':
+      return [
+        `-- Animation helper for ${params.addon_name}`,
+        'local function CreateFadeAnimation(control)',
+        '    local timeline = ANIMATION_MANAGER:CreateTimeline()',
+        '    local anim = timeline:InsertAnimation(ANIMATION_ALPHA, control, 0)',
+        '    anim:SetAlphaValues(0, 1)',
+        '    anim:SetDuration(300)',
+        '    anim:SetEasingFunction(ZO_EaseInOutQuadratic)',
+        '    return timeline',
+        'end',
+        '',
+        'local function CreateSlideAnimation(control, startOffsetY, endOffsetY)',
+        '    local timeline = ANIMATION_MANAGER:CreateTimeline()',
+        '    local anim = timeline:InsertAnimation(ANIMATION_TRANSLATE, control, 0)',
+        '    anim:SetTranslateOffsets(0, startOffsetY, 0, endOffsetY)',
+        '    anim:SetDuration(250)',
+        '    anim:SetEasingFunction(ZO_EaseOutQuadratic)',
+        '    return timeline',
+        'end',
+        '',
+        '-- Usage:',
+        '-- local fadeIn = CreateFadeAnimation(myControl)',
+        '-- fadeIn:PlayFromStart()',
+      ].join('\n');
+
+    case 'tooltip_extension':
+      return [
+        `-- Tooltip extension for ${params.addon_name}`,
+        `local function Add${params.addon_name}TooltipInfo(tooltip, data)`,
+        '    if not data then return end',
+        '    tooltip:AddLine("", "ZoFontGameSmall", 1, 1, 1, TEXT_ALIGN_CENTER)',
+        `    tooltip:AddLine("[${params.addon_name}]", "ZoFontGameBold", 1, 0.84, 0, TEXT_ALIGN_LEFT)`,
+        '    if data.description then',
+        '        tooltip:AddLine(data.description, "ZoFontGame", 0.8, 0.8, 0.8, TEXT_ALIGN_LEFT)',
+        '    end',
+        'end',
+        '',
+        '-- Hook item tooltip',
+        'local originalLayoutItemTooltip = ZO_ItemTooltip.LayoutItem',
+        'ZO_ItemTooltip.LayoutItem = function(self, bag, slot)',
+        '    originalLayoutItemTooltip(self, bag, slot)',
+        '    local data = { description = "Custom info here" }',
+        `    Add${params.addon_name}TooltipInfo(self, data)`,
+        'end',
+      ].join('\n');
+
+    default:
+      return `-- Unknown pattern: ${params.pattern}`;
+  }
+}
+
 // ===== TOOL DEFINITIONS =====
 
 const definitions = [
@@ -847,6 +1091,64 @@ const definitions = [
       required: ['addon_name', 'defaults'],
     },
   },
+  {
+    name: 'generate_class_code',
+    description:
+      'Generate ESO OOP class code using the ZO_Object:Subclass() pattern. Produces a properly structured Lua class with New(), Initialize(), and optional method stubs following ESO conventions.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        class_name: {
+          type: 'string',
+          description: 'The class name (PascalCase, must start with an uppercase letter)',
+        },
+        parent_class: {
+          type: 'string',
+          description: 'Parent class to subclass from (default: ZO_Object)',
+        },
+        methods: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of method names to generate stub implementations for',
+        },
+        addon_name: {
+          type: 'string',
+          description: 'The addon name (used to attach the class to the addon namespace)',
+        },
+      },
+      required: ['class_name', 'addon_name'],
+    },
+  },
+  {
+    name: 'generate_utility_snippet',
+    description:
+      'Generate common ESO Lua utility code patterns. Covers throttled updates, string formatting, deep copy, color definitions, callback objects, sort/filter lists, icon formatting, animations, and tooltip extensions.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        pattern: {
+          type: 'string',
+          enum: [
+            'throttled_update',
+            'string_format',
+            'deep_copy',
+            'color_def',
+            'callback_object',
+            'sort_filter_list',
+            'icon_format',
+            'animation',
+            'tooltip_extension',
+          ],
+          description: 'The utility pattern to generate',
+        },
+        addon_name: {
+          type: 'string',
+          description: 'The addon name',
+        },
+      },
+      required: ['pattern', 'addon_name'],
+    },
+  },
 ];
 
 // ===== HANDLER =====
@@ -937,6 +1239,36 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         code,
         saved_variables_name: `${params.addon_name}SavedVariables`,
         storage_type: params.account_wide ? 'account-wide' : 'character-specific',
+      });
+    }
+
+    case 'generate_class_code': {
+      const params = GenerateClassCodeSchema.parse(args);
+      const code = generateClassCode({
+        class_name: params.class_name,
+        parent_class: params.parent_class,
+        methods: params.methods,
+        addon_name: params.addon_name,
+      });
+
+      return jsonResult({
+        code,
+        class_name: params.class_name,
+        parent_class: params.parent_class,
+        note: `Class attached to ${params.addon_name}.${params.class_name}. Call ${params.class_name}:New(control) to instantiate.`,
+      });
+    }
+
+    case 'generate_utility_snippet': {
+      const params = GenerateUtilitySnippetSchema.parse(args);
+      const code = generateUtilitySnippet({
+        pattern: params.pattern,
+        addon_name: params.addon_name,
+      });
+
+      return jsonResult({
+        code,
+        pattern: params.pattern,
       });
     }
 

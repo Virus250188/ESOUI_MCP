@@ -334,11 +334,7 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
       let events: any[] = [];
       let constants: any[] = [];
 
-      try {
-        functions = db.searchApiFunctions({ query: params.query, limit: 15 });
-      } catch {
-        // FTS or table not available - searchApiFunctions has internal LIKE fallback
-      }
+      functions = db.searchApiFunctions({ query: params.query, limit: 15 });
 
       try {
         events = db.searchEvents({ query: params.query, limit: 10 });

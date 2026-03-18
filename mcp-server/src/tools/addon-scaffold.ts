@@ -718,6 +718,8 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
           const trimmed = line.trim();
           if (!trimmed || trimmed.startsWith('##') || trimmed.startsWith(';') || trimmed.startsWith('--')) continue;
           if (trimmed.endsWith('.lua') || trimmed.endsWith('.xml')) {
+            // Skip ESO runtime variables like $(language), $(macrolanguage) - these are resolved at load time
+            if (trimmed.includes('$(')) continue;
             const filePath = join(params.addon_path, trimmed);
             if (!existsSync(filePath)) {
               errors.push(`Listed file not found: "${trimmed}". Remove from manifest or add the file.`);
@@ -790,9 +792,16 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
       for (const f of luaFiles) {
         const content = readFileSync(f, 'utf-8');
         const fileLines = content.split('\n');
+        let insideFunction = 0; // Track nesting depth
         for (const line of fileLines) {
           const trimmed = line.trim();
-          if (trimmed.startsWith('--') || trimmed.startsWith('local ') || !trimmed) continue;
+          if (trimmed.startsWith('--') || !trimmed) continue;
+          // Track function/block nesting (rough heuristic)
+          if (/\bfunction\b/.test(trimmed)) insideFunction++;
+          if (/\bend\b/.test(trimmed)) insideFunction = Math.max(0, insideFunction - 1);
+          // Only flag globals at the top level (not inside functions)
+          if (insideFunction > 0) continue;
+          if (trimmed.startsWith('local ')) continue;
           // Check for global assignments (lowercase start = likely accidental global)
           const globalMatch = trimmed.match(/^([a-z]\w*)\s*=/);
           if (globalMatch && !['if', 'else', 'elseif', 'end', 'for', 'while', 'repeat', 'return', 'function', 'do', 'then'].includes(globalMatch[1])) {
@@ -807,15 +816,19 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
 
       // === RULE 12: Non-ESO file types check ===
       const allowedExtensions = ['.lua', '.xml', '.dds', '.txt', '.addon'];
+      // Common non-ESO files that are acceptable for GitHub repos but ignored by ESO
+      const commonRepoFiles = ['changelog.md', 'readme.md', 'license', 'license.md', 'license.txt', '.gitignore', '.gitattributes'];
       const nonEsoFiles: string[] = [];
       for (const f of allFiles) {
         const rel = f.substring(params.addon_path.length + 1);
-        // Skip files already flagged as unwanted
         const isUnwanted = unwantedPatterns.some(p => rel.includes(p));
         if (isUnwanted) continue;
         const hasAllowedExt = allowedExtensions.some(ext => f.toLowerCase().endsWith(ext));
         if (!hasAllowedExt) {
-          nonEsoFiles.push(rel);
+          // Don't flag common repo files as warnings - just info
+          if (!commonRepoFiles.includes(rel.toLowerCase())) {
+            nonEsoFiles.push(rel);
+          }
         }
       }
       if (nonEsoFiles.length > 0) {

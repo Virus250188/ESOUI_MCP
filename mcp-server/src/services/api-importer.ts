@@ -5,6 +5,9 @@
  */
 
 import { db } from '../database/db.js';
+import { existsSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const UESP_BASE = 'https://esoapi.uesp.net/current';
 const GLOBAL_FUNCS_URL = `${UESP_BASE}/globalfuncs.txt`;
@@ -394,11 +397,64 @@ export async function ensureApiDataLoaded(): Promise<void> {
     return;
   }
 
+  // Try loading from our own bundled JSON first (fastest, no network needed)
+  const bundledJsonPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'data', 'api', 'eso-api-reference.json');
+  if (existsSync(bundledJsonPath)) {
+    console.error('Loading API data from bundled eso-api-reference.json...');
+    try {
+      const jsonData = JSON.parse(readFileSync(bundledJsonPath, 'utf-8'));
+      let funcCount = 0;
+      let eventCount = 0;
+
+      db.transaction(() => {
+        for (const func of jsonData.functions || []) {
+          db.insertApiFunction({
+            name: func.name,
+            namespace: func.namespace || null,
+            category: func.category || null,
+            signature: func.signature || null,
+            parameters: func.parameters || null,
+            return_values: func.return_values || null,
+            description: func.description || null,
+            source_file: func.source_file || null,
+            is_protected: func.is_protected || false,
+            api_version: func.api_version || null,
+          });
+          funcCount++;
+        }
+        for (const evt of jsonData.events || []) {
+          db.insertApiEvent({
+            name: evt.name,
+            category: evt.category || null,
+            parameters: evt.parameters || null,
+            description: evt.description || null,
+            source_file: evt.source_file || null,
+            api_version: evt.api_version || null,
+          });
+          eventCount++;
+        }
+      });
+
+      importUIControls();
+
+      db.setImportMetadata('api_data_imported', 'true');
+      db.setImportMetadata('api_data_source', 'bundled eso-api-reference.json');
+      db.setImportMetadata('api_data_import_date', new Date().toISOString());
+      db.setImportMetadata('api_functions_count', String(funcCount));
+      db.setImportMetadata('api_events_count', String(eventCount));
+
+      console.error(`Loaded ${funcCount} functions, ${eventCount} events from bundled data`);
+      return;
+    } catch (e) {
+      console.error('Bundled JSON load failed, falling back to UESP...', e instanceof Error ? e.message : e);
+    }
+  }
+
   console.error('First start detected - importing ESO API data from UESP...');
   console.error('This may take a minute. Subsequent starts will be instant.');
 
   try {
-    // Import functions
+    // Import functions from UESP
     const funcCount = await importGlobalFunctions();
     console.error(`Imported ${funcCount} API functions`);
 

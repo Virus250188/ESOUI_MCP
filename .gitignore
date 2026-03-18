@@ -10,6 +10,9 @@ data/eso_sets.db
 data/eso_sets.db-wal
 data/eso_sets.db-shm
 
+# Original third-party documentation (downloaded on-demand, not distributed)
+data/api/ESOUIDocumentation.txt
+
 # Excel temp files
 ~$*
 

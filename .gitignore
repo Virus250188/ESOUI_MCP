@@ -24,3 +24,9 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Claude Code local settings (contains personal paths)
+.claude/
+
+# API reference (generated)
+data/api/

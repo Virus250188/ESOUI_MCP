@@ -3,7 +3,7 @@
     "eso-addon-dev": {
       "command": "node",
       "args": [
-        "C:\\Users\\Miguel\\Desktop\\ESO_MCP\\mcp-server\\dist\\index.js"
+        "C:\\Users\\YourUsername\\path\\to\\ESO_MCP\\mcp-server\\dist\\index.js"
       ]
     }
   }

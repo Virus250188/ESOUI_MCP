@@ -443,7 +443,8 @@ export class ESO_Database {
       }
     }
 
-    sql += ` ORDER BY name LIMIT ?`;
+    // Prioritize official docs over UESP, non-deprecated over deprecated
+    sql += ` ORDER BY is_deprecated ASC, CASE source_type WHEN 'official' THEN 0 WHEN 'uesp_lua' THEN 1 ELSE 2 END, name LIMIT ?`;
     values.push(params.limit || 50);
 
     try {
@@ -473,7 +474,8 @@ export class ESO_Database {
   }
 
   getFunctionByName(name: string): APIFunction | undefined {
-    const stmt = this.db.prepare(`SELECT * FROM api_functions WHERE name = ?`);
+    // Prefer official docs over UESP, non-deprecated over deprecated
+    const stmt = this.db.prepare(`SELECT * FROM api_functions WHERE name = ? ORDER BY is_deprecated ASC, CASE source_type WHEN 'official' THEN 0 WHEN 'uesp_lua' THEN 1 ELSE 2 END LIMIT 1`);
     return stmt.get(name) as APIFunction | undefined;
   }
 

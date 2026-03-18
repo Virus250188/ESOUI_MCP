@@ -164,12 +164,14 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         });
       }
 
-      const mapped = results.map((fn) => ({
+      const mapped = results.map((fn: any) => ({
         name: fn.name,
         signature: fn.signature || fn.name,
         category: fn.category || undefined,
         namespace: fn.namespace || undefined,
         is_protected: fn.is_protected,
+        is_deprecated: fn.is_deprecated ? true : undefined,
+        source_type: fn.source_type || undefined,
       }));
 
       return jsonResult({
@@ -198,7 +200,7 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
 
       const related = db.getRelatedFunctions(func.name, 10);
 
-      const details = {
+      const details: any = {
         name: func.name,
         namespace: func.namespace || undefined,
         category: func.category || undefined,
@@ -208,9 +210,14 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         description: func.description || undefined,
         source_file: func.source_file || undefined,
         is_protected: func.is_protected,
+        is_deprecated: (func as any).is_deprecated ? true : undefined,
+        source_type: (func as any).source_type || undefined,
         api_version: func.api_version || undefined,
         related_functions: related.length > 0 ? related.map((r) => r.name) : undefined,
       };
+      if (details.is_deprecated) {
+        details.deprecation_warning = 'This function is a deprecated compatibility alias. It may be removed in future API versions. Check for a current replacement.';
+      }
 
       return jsonResult(details);
     }

@@ -42,6 +42,18 @@ const PrepareAddonUploadSchema = z.object({
   addon_path: z.string().describe('Path to the addon directory to validate for ESOUI upload'),
 });
 
+const ManageChangelogSchema = z.object({
+  addon_path: z.string().describe('Path to the addon directory containing CHANGELOG.md'),
+  action: z.enum(['read', 'add_entry', 'get_esoui_upload_text']).describe(
+    'read: show current changelog. add_entry: add a new version entry at the top. get_esoui_upload_text: get the FULL changelog text for ESOUI API upload (ESOUI overwrites, never appends!)'
+  ),
+  version: z.string().optional().describe('Version number for new entry (e.g., "1.5.3")'),
+  changes: z.array(z.object({
+    category: z.string().optional().describe('Change category (e.g., "Features", "Bugfixes", "Changes")'),
+    items: z.array(z.string()).describe('List of changes in this category'),
+  })).optional().describe('Changes for the new version entry'),
+});
+
 // ===== GENERATORS =====
 
 function generateManifestContent(params: {
@@ -484,6 +496,36 @@ const definitions = [
       required: ['addon_path'],
     },
   },
+  {
+    name: 'manage_changelog',
+    description:
+      'Manage CHANGELOG.md for ESO addons. CRITICAL: The ESOUI upload API OVERWRITES the entire changelog — it never appends! This tool ensures you always work with the complete changelog. Actions: "read" (show current), "add_entry" (add new version at top, keeping all history), "get_esoui_upload_text" (get the FULL text to send to ESOUI API so nothing gets lost).',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        addon_path: { type: 'string', description: 'Path to addon directory containing CHANGELOG.md' },
+        action: {
+          type: 'string',
+          enum: ['read', 'add_entry', 'get_esoui_upload_text'],
+          description: 'read: show changelog. add_entry: add new version. get_esoui_upload_text: get FULL text for ESOUI upload',
+        },
+        version: { type: 'string', description: 'Version for new entry (e.g., "1.5.3")' },
+        changes: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              category: { type: 'string', description: 'Category (Features, Bugfixes, Changes)' },
+              items: { type: 'array', items: { type: 'string' }, description: 'List of changes' },
+            },
+            required: ['items'],
+          },
+          description: 'Changes for new version',
+        },
+      },
+      required: ['addon_path', 'action'],
+    },
+  },
 ];
 
 // ===== HANDLER =====
@@ -790,6 +832,105 @@ async function handler(name: string, args: unknown): Promise<ToolResult> {
         files_found: allFiles.length,
         lua_files: luaFiles.length,
       });
+    }
+
+    case 'manage_changelog': {
+      const params = ManageChangelogSchema.parse(args);
+
+      try {
+        validateAddonPath(params.addon_path);
+      } catch (e) {
+        if (e instanceof PathValidationError) return errorResult(e.message);
+        throw e;
+      }
+
+      const changelogPath = join(params.addon_path, 'CHANGELOG.md');
+      const addonName = basename(params.addon_path);
+
+      switch (params.action) {
+        case 'read': {
+          if (!existsSync(changelogPath)) {
+            return errorResult(`No CHANGELOG.md found in ${params.addon_path}. Use action "add_entry" to create one.`);
+          }
+          const content = readFileSync(changelogPath, 'utf-8');
+          return jsonResult({
+            file: changelogPath,
+            content,
+            line_count: content.split('\n').length,
+            tip: 'Use action "get_esoui_upload_text" to get the full text for ESOUI API upload.',
+          });
+        }
+
+        case 'add_entry': {
+          if (!params.version) {
+            return errorResult('Parameter "version" is required for add_entry action.');
+          }
+          if (!params.changes || params.changes.length === 0) {
+            return errorResult('Parameter "changes" is required for add_entry action.');
+          }
+
+          // Build new entry
+          const date = new Date().toISOString().split('T')[0];
+          let newEntry = `## v${params.version} (${date})\n\n`;
+          for (const change of params.changes) {
+            if (change.category) {
+              newEntry += `### ${change.category}\n`;
+            }
+            for (const item of change.items) {
+              newEntry += `- ${item}\n`;
+            }
+            newEntry += '\n';
+          }
+
+          // Read existing or create new
+          let existingContent = '';
+          let header = `# Changelog - ${addonName}\n\n`;
+          if (existsSync(changelogPath)) {
+            existingContent = readFileSync(changelogPath, 'utf-8');
+            // Find where the first ## starts (skip the # header)
+            const firstEntry = existingContent.indexOf('\n## ');
+            if (firstEntry !== -1) {
+              header = existingContent.substring(0, firstEntry + 1);
+              existingContent = existingContent.substring(firstEntry + 1);
+            } else {
+              header = existingContent.includes('# ') ? existingContent.split('\n')[0] + '\n\n' : header;
+              existingContent = '';
+            }
+          }
+
+          const fullContent = header + newEntry + existingContent;
+
+          return jsonResult({
+            file: changelogPath,
+            content: fullContent,
+            new_entry: newEntry,
+            action: 'WRITE this content to CHANGELOG.md',
+            warning: 'IMPORTANT: When uploading to ESOUI, always use get_esoui_upload_text to get the FULL changelog. The ESOUI API OVERWRITES the changelog field — it never appends!',
+          });
+        }
+
+        case 'get_esoui_upload_text': {
+          if (!existsSync(changelogPath)) {
+            return errorResult(`No CHANGELOG.md found in ${params.addon_path}.`);
+          }
+
+          const content = readFileSync(changelogPath, 'utf-8');
+
+          // Strip the markdown header line for ESOUI (they don't need "# Changelog - AddonName")
+          const lines = content.split('\n');
+          const startIdx = lines.findIndex(l => l.startsWith('## '));
+          const esoUIText = startIdx >= 0 ? lines.slice(startIdx).join('\n').trim() : content.trim();
+
+          return jsonResult({
+            esoui_changelog_text: esoUIText,
+            warning: 'CRITICAL: Send this ENTIRE text as the "changelog" field in the ESOUI upload API. The API OVERWRITES — it does NOT append! If you only send the latest version, all previous entries will be LOST.',
+            line_count: esoUIText.split('\n').length,
+            versions_found: (esoUIText.match(/^## /gm) || []).length,
+          });
+        }
+      }
+
+      return errorResult(`Unknown changelog action: ${params.action}`);
     }
 
     default:

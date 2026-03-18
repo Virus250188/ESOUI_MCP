@@ -122,7 +122,8 @@ function runScript(scriptName: string, timeout: number = 300000): string {
 
 async function updateApiDocs(): Promise<{ functions: number; events: number }> {
   // Download fresh ESOUIDocumentation.txt from GitHub
-  const url = 'https://raw.githubusercontent.com/esoui/esoui/master/ESOUIDocumentation.txt';
+  // IMPORTANT: Use 'live' branch, NOT 'master'! Master is outdated (API 101041), live is current.
+  const url = 'https://raw.githubusercontent.com/esoui/esoui/live/ESOUIDocumentation.txt';
   const docPath = join(DATA_DIR, 'api', 'ESOUIDocumentation.txt');
 
   const response = await fetch(url, { signal: AbortSignal.timeout(60000) });

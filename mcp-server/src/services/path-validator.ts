@@ -3,7 +3,7 @@
  * All user-provided file paths must go through this before any fs operations.
  */
 
-import { resolve, normalize } from 'path';
+import { resolve, normalize, sep } from 'path';
 import { homedir } from 'os';
 import { join } from 'path';
 
@@ -33,8 +33,10 @@ export function validatePath(userPath: string, allowedExtensions?: string[]): st
   const resolved = resolve(userPath);
   const normalized = normalize(resolved);
 
-  // Check if path is within any allowed root
-  const isAllowed = ALLOWED_ROOTS.some(root => normalized.startsWith(root));
+  // Check if path is within any allowed root (append separator to prevent prefix tricks)
+  const isAllowed = ALLOWED_ROOTS.some(root =>
+    normalized === root || normalized.startsWith(root + sep)
+  );
   if (!isAllowed) {
     throw new PathValidationError(
       `Path is outside allowed directories: ${userPath}\n` +

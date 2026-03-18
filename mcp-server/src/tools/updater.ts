@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { execSync } from 'child_process';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, writeFileSync } from 'fs';
 import { db } from '../database/db.js';
@@ -99,8 +99,19 @@ function getStatus(): Record<string, any> {
   };
 }
 
+// Allowlist of scripts that can be executed - prevents arbitrary script execution
+const ALLOWED_SCRIPTS = ['import-all-sets.ts', 'scrape-set-bonuses.ts', 'import-api-docs.ts'];
+
 function runScript(scriptName: string, timeout: number = 300000): string {
+  if (!ALLOWED_SCRIPTS.includes(scriptName)) {
+    throw new Error(`Script not allowed: ${scriptName}. Allowed: ${ALLOWED_SCRIPTS.join(', ')}`);
+  }
   const scriptPath = join(SCRIPTS_DIR, scriptName);
+  // Verify resolved path is still inside SCRIPTS_DIR
+  const resolved = resolve(scriptPath);
+  if (!resolved.startsWith(resolve(SCRIPTS_DIR))) {
+    throw new Error(`Script path escapes scripts directory: ${scriptName}`);
+  }
   if (!existsSync(scriptPath)) {
     throw new Error(`Script not found: ${scriptPath}`);
   }
